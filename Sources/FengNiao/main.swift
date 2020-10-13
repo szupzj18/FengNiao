@@ -140,53 +140,70 @@ do {
 }
 
 if unusedFiles.isEmpty {
-    print("😎 Hu, you have no unused resources in path: \(Path(projectPath).absolute()).".green.bold)
+//    print("😎 Hu, you have no unused resources in path: \(Path(projectPath).absolute()).".green.bold)
+    exit(EX_OK)
+} else {
+//    var result = promptResult(files: unusedFiles)
+    let size = unusedFiles.reduce(0) { $0 + $1.size }.fn_readableSize
+    print("\(unusedFiles.count) unused files are found. Total Size: \(size)".yellow.bold)
+    for file in unusedFiles.sorted(by: { $0.size > $1.size }) {
+//        print("\(file.readableSize) \(file.path.string)")
+        print("\(file.path.string)")
+    }
+//    while result == .list {
+//        for file in unusedFiles.sorted(by: { $0.size > $1.size }) {
+//            print("\(file.readableSize) \(file.path.string)")
+//        }
+//        result = promptResult(files: unusedFiles)
+//    }
     exit(EX_OK)
 }
 
-if !isForce {
-    var result = promptResult(files: unusedFiles)
-    while result == .list {
-        for file in unusedFiles.sorted(by: { $0.size > $1.size }) {
-            print("\(file.readableSize) \(file.path.string)")
-        }
-        result = promptResult(files: unusedFiles)
-    }
-    
-    switch result {
-    case .list:
-        fatalError()
-    case .delete:
-        break
-    case .ignore:
-        print("Ignored. Nothing to do, bye!".green.bold)
-        exit(EX_OK)
-    }
-}
-
-print("Deleting unused files...⚙".bold)
-
-let (deleted, failed) = FengNiao.delete(unusedFiles)
-guard failed.isEmpty else {
-    print("\(unusedFiles.count - failed.count) unused files are deleted. But we encountered some error while deleting these \(failed.count) files:".yellow.bold)
-    for (fileInfo, err) in failed {
-        print("\(fileInfo.path.string) - \(err.localizedDescription)")
-    }
-    exit(EX_USAGE)
-}
-
-
-print("\(unusedFiles.count) unused files are deleted.".green.bold)
-
-if !skipProjRefereceCleanOption.value {
-    if let children = try? Path(projectPath).absolute().children(){
-        print("Now Deleting unused Reference in project.pbxproj...⚙".bold)
-        for path in children {
-            if path.lastComponent.hasSuffix("xcodeproj"){
-                let pbxproj = path + "project.pbxproj"
-                FengNiao.deleteReference(projectFilePath: pbxproj, deletedFiles: deleted)
-            }
-        }
-        print("Unused Reference deleted successfully.".green.bold)
-    }
-}
+// 不执行直接删除的脚本
+//
+//if !isForce {
+//    var result = promptResult(files: unusedFiles)
+//    while result == .list {
+//        for file in unusedFiles.sorted(by: { $0.size > $1.size }) {
+//            print("\(file.readableSize) \(file.path.string)")
+//        }
+//        result = promptResult(files: unusedFiles)
+//    }
+//
+//    switch result {
+//    case .list:
+//        fatalError()
+//    case .delete:
+//        break
+//    case .ignore:
+//        print("Ignored. Nothing to do, bye!".green.bold)
+//        exit(EX_OK)
+//    }
+//}
+//
+//print("Deleting unused files...⚙".bold)
+//
+//let (deleted, failed) = FengNiao.delete(unusedFiles)
+//guard failed.isEmpty else {
+//    print("\(unusedFiles.count - failed.count) unused files are deleted. But we encountered some error while deleting these \(failed.count) files:".yellow.bold)
+//    for (fileInfo, err) in failed {
+//        print("\(fileInfo.path.string) - \(err.localizedDescription)")
+//    }
+//    exit(EX_USAGE)
+//}
+//
+//
+//print("\(unusedFiles.count) unused files are deleted.".green.bold)
+//
+//if !skipProjRefereceCleanOption.value {
+//    if let children = try? Path(projectPath).absolute().children(){
+//        print("Now Deleting unused Reference in project.pbxproj...⚙".bold)
+//        for path in children {
+//            if path.lastComponent.hasSuffix("xcodeproj"){
+//                let pbxproj = path + "project.pbxproj"
+//                FengNiao.deleteReference(projectFilePath: pbxproj, deletedFiles: deleted)
+//            }
+//        }
+//        print("Unused Reference deleted successfully.".green.bold)
+//    }
+//}
